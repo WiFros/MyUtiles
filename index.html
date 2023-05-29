@@ -1,56 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Travel Expense Calculator</title>
+    <title>Travel Expense Splitter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js"></script>
+    <style>
+        #data {
+            width: 100%;
+            height: 200px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Travel Expense Calculator</h1>
-
-    <form id="form">
-        <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name"><br>
-        <label for="amount">Amount spent:</label><br>
-        <input type="number" id="amount" name="amount"><br>
-        <input type="submit" value="Add person">
-    </form>
-
-    <button onclick="calculate()">Calculate</button>
-
-    <h2>Results</h2>
-    <div id="results"></div>
-
+    <h1>Travel Expense Splitter</h1>
+    <p>Paste your data in the format:</p>
+    <pre>
+        이름,사용한 금액
+        철수,730000
+        영희,45000
+        짱구,95000
+        ...
+        참여자,이름
+        ...
+    </pre>
+    <textarea id="data" placeholder="Paste your data here"></textarea>
+    <button onclick="handlePaste()">Parse Data</button>
+    <pre id="output"></pre>
     <script>
-        var data = [];
+        function handlePaste() {
+            var data = document.getElementById('data').value;
+            var results = Papa.parse(data);
+            var splitResults = splitExpenses(results.data);
+            document.getElementById('output').textContent = JSON.stringify(splitResults, null, 2);
+        }
 
-        document.getElementById('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var name = document.getElementById('name').value;
-            var amount = document.getElementById('amount').value;
-            data.push({ name: name, amount: parseInt(amount) });
-            document.getElementById('name').value = '';
-            document.getElementById('amount').value = '';
-        });
-
-        function calculate() {
+        function splitExpenses(data) {
+            // Your expense splitting logic here
+            // This is a placeholder and must be replaced with your own logic
             var total = 0;
-            data.forEach(function(person) {
-                total += person.amount;
-            });
-            var average = total / data.length;
-
-            var results = document.getElementById('results');
-            results.innerHTML = '';
-
-            data.forEach(function(person) {
-                var difference = person.amount - average;
-                var resultText = person.name + ' should ';
-                if (difference > 0) {
-                    resultText += 'receive ' + Math.abs(difference);
+            var count = 0;
+            var expenses = {};
+            var participants = [];
+            data.forEach(function(row) {
+                if (row[1]) {
+                    var name = row[0];
+                    var amount = parseInt(row[1]);
+                    total += amount;
+                    count += 1;
+                    expenses[name] = (expenses[name] || 0) + amount;
                 } else {
-                    resultText += 'pay ' + Math.abs(difference);
+                    participants.push(row[0]);
                 }
-                results.innerHTML += '<p>' + resultText + '</p>';
             });
+            var average = total / count;
+            var splits = {};
+            Object.keys(expenses).forEach(function(name) {
+                splits[name] = expenses[name] - average;
+            });
+            participants.forEach(function(name) {
+                splits[name] = splits[name] || -average;
+            });
+            return splits;
         }
     </script>
 </body>
