@@ -58,4 +58,12 @@ button:hover {
     .container {
         padding: 10px;
     }
+
+    table {
+        font-size: 14px;
+    }
+
+    button {
+        font-size: 14px;
+    }
 }
