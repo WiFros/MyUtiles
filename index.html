@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Travel Expense Calculator</title>
+</head>
+<body>
+    <h1>Travel Expense Calculator</h1>
+
+    <form id="form">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name"><br>
+        <label for="amount">Amount spent:</label><br>
+        <input type="number" id="amount" name="amount"><br>
+        <input type="submit" value="Add person">
+    </form>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <h2>Results</h2>
+    <div id="results"></div>
+
+    <script>
+        var data = [];
+
+        document.getElementById('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var name = document.getElementById('name').value;
+            var amount = document.getElementById('amount').value;
+            data.push({ name: name, amount: parseInt(amount) });
+            document.getElementById('name').value = '';
+            document.getElementById('amount').value = '';
+        });
+
+        function calculate() {
+            var total = 0;
+            data.forEach(function(person) {
+                total += person.amount;
+            });
+            var average = total / data.length;
+
+            var results = document.getElementById('results');
+            results.innerHTML = '';
+
+            data.forEach(function(person) {
+                var difference = person.amount - average;
+                var resultText = person.name + ' should ';
+                if (difference > 0) {
+                    resultText += 'receive ' + Math.abs(difference);
+                } else {
+                    resultText += 'pay ' + Math.abs(difference);
+                }
+                results.innerHTML += '<p>' + resultText + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>
