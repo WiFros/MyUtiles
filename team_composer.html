@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>팀 구성기</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>팀 구성기</h1>
+        <h2>참여자 목록</h2>
+        <table id="participants">
+            <tr>
+                <th>구분번호</th>
+                <th>학과</th>
+                <th>이름</th>
+                <th>성별</th>
+            </tr>
+            <tr>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+            </tr>
+        </table>
+        <button onclick="addParticipant()">참가자 추가</button>
+        <h2>팀 구성</h2>
+        <label for="teamSize">팀당 인원 수:</label>
+        <input type="number" id="teamSize" min="1">
+        <br>
+        <label for="option">팀 구성 옵션:</label>
+        <select id="option">
+            <option value="equal">학과별로 고르게 섞기</option>
+            <option value="unequal">랜덤으로 섞기</option>
+        </select>
+        <br>
+        <button onclick="composeTeams()">팀 구성하기</button>
+        <pre id="output"></pre>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

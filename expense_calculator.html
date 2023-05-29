@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>여행 경비 분배기</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>여행 경비 분배기</h1>
+        <button onclick="goBack()">뒤로가기</button>
+        <h2>참여자</h2>
+        <table id="participants">
+            <tr>
+                <th>이름</th>
+                <th>동작</th>
+            </tr>
+            <tr>
+                <td><input type="text"></td>
+                <td><button onclick="removeRow(this)">삭제</button></td>
+            </tr>
+        </table>
+        <button onclick="addParticipant()">참가자 추가</button>
+        <h2>경비 내역</h2>
+        <table id="expenses">
+            <tr>
+                <th>결제자</th>
+                <th>결제 금액</th>
+                <th>동작</th>
+            </tr>
+            <tr>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><button onclick="removeRow(this)">삭제</button></td>
+            </tr>
+        </table>
+        <button onclick="addExpense()">경비 추가</button>
+        <button onclick="calculate()">계산하기</button>
+        <pre id="output"></pre>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(function(registration) {
+                    console.log('Service Worker 등록 성공:', registration);
+                })
+                .catch(function(error) {
+                    console.log('Service Worker 등록 실패:', error);
+                });
+        }
+
+        // 뒤로가기 버튼 클릭 시 이전 페이지로 이동
+        function goBack() {
+            window.history.back();
+        }
+
+        // 데이터 저장하기
+        function saveData() {
+            var participants = Array.from(document.querySelectorAll('#participants input')).map(input => input.value);
+            var expenses = Array.from(document.querySelectorAll('#expenses input')).reduce(function(result, input, index) {
+                if (index % 2 == 0) {
+                    result.push({name: input.value, expense: 0});
+                } else {
+                    result[result.length - 1].expense += parseInt(input.value);
+                }
+                return result;
+            }, []);
+
+            var data = {
+                participants: participants,
+                expenses: expenses
+            };
+
+            // Service Worker에 데이터 캐시 요청
+            navigator.serviceWorker.controller.postMessage({ action: 'cacheData', data: data });
+        }
+
+        // 페이지 로드 시 저장된 데이터 불러오기
+        window.onload = function() {
+            // Service Worker에 캐시된 데이터 요청
+            navigator.serviceWorker.controller.postMessage({ action: 'getCachedData' });
+        };
+
+        // Service Worker로부터 캐시된 데이터 받기
+        navigator.serviceWorker.addEventListener('message', function(event) {
+            var data = event.data;
+            if (data && data.action === 'cachedData') {
+                var cachedData = data.data;
+                if (cachedData) {
+                    // 참여자 데이터 불러오기
+                    var participantsTable = document.getElementById('participants');
+                    participantsTable.innerHTML = '<tr><th>이름</th><th>동작</th></tr>';
+                    cachedData.participants.forEach(function (participant) {
+                        var row = document.createElement('tr');
+                        row.innerHTML = '<td><input type="text" value="' + participant + '"></td><td><button onclick="removeRow(this)">삭제</button></td>';
+                        participantsTable.appendChild(row);
+                    });
+                    // 경비 데이터 불러오기
+                    var expensesTable = document.getElementById('expenses');
+                    expensesTable.innerHTML = '<tr><th>결제자</th><th>결제 금액</th><th>동작</th></tr>';
+                    cachedData.expenses.forEach(function (expense) {
+                        var row = document.createElement('tr');
+                        row.innerHTML = '<td><input type="text" value="' + expense.name + '"></td><td><input type="text" value="' + expense.expense + '"></td><td><button onclick="removeRow(this)">삭제</button></td>';
+                        expensesTable.appendChild(row);
+                    });
+                }
+            }
+        });
+
+        // 계산하기 버튼 클릭 시 데이터 저장 및 계산
+        function calculate() {
+            saveData();
+
+            // 이하 계산 로직 생략
+            // ...
+        }
+    </script>
+</body>
+</html>
